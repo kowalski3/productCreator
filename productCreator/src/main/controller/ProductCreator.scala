@@ -102,7 +102,7 @@ class ProductCreator( val assetSourceDirName: String,
            //view.printText("Creating: " + albumid + " in " + "format.")
            for ((songid,trackName) <- result.get.trackList)
                try{
-                 view.printText(songid)
+                // view.printText(songid)
                  copyFiles(albumFolderPath, songid, suffixes, trackName, format) 
                } catch{
                  case e: RuntimeException => println(e)

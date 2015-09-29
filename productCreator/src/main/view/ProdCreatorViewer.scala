@@ -34,9 +34,7 @@ class ProdCreatorViewer extends PApplet{
   //Text input
   var albums:Array[String] = null;
   var textfield: Textfield = null
-  
-  
-  
+
   override def setup(){
     
     size(300,510) 
@@ -110,15 +108,12 @@ class ProdCreatorViewer extends PApplet{
       .setColorBackground(color(255,100))
       .setColorForeground(color(255,100));
     
-   
-    
-    
+
   }
   
   override def draw(){
     background(0);
      fill(255);
-    
   }
   
   /*----------------------------------------------------------
@@ -129,7 +124,7 @@ class ProdCreatorViewer extends PApplet{
         assetDirSetTemp = true
         selectFolder("Select an asset directory", "selected")
       } else{
-        myTextarea.setText("Asset directory is already set");
+        printText("Asset directory is already set");
       }
   }
  
@@ -139,7 +134,7 @@ class ProdCreatorViewer extends PApplet{
         formatDirSetTemp = true
         selectFolder("Select a format directory", "selected")
       } else{
-        myTextarea.setText("Format directory is already set");
+        printText("Format directory is already set");
       }
   }  
     
@@ -149,7 +144,7 @@ class ProdCreatorViewer extends PApplet{
         outDirSetTemp = true
         selectFolder("Select an output directory", "selected")
       } else{
-        myTextarea.setText("Output directory is already set");
+        printText("Output directory is already set");
       }
   }
   
@@ -158,7 +153,7 @@ class ProdCreatorViewer extends PApplet{
         dataDirSetTemp = true
         selectInput("Select a data file", "fileSelected");
       } else{
-        myTextarea.setText("Data file is already set");
+        printText("Data file is already set");
       }
   }
   
@@ -166,23 +161,26 @@ class ProdCreatorViewer extends PApplet{
    
   def selected(selection: File) {
       if (selection == null) {
-        myTextarea.setText("Window was closed or the user hit cancel.");
+        printText("Window was closed or the user hit cancel.");
         assetDirSetTemp = false
         outDirSetTemp = false
         formatDirSetTemp = false
         dataDirSetTemp = false
       } else if(assetDirSetTemp){
-        myTextarea.setText("Asset directory is " + selection.getAbsolutePath());
+        myTextarea.clear()
+        printText("Asset directory is " + selection.getAbsolutePath());
         assetDir =  selection.getAbsolutePath()
         assetDirSet = true;
         assetDirSetTemp = false;
       } else if(formatDirSetTemp){
-        myTextarea.setText("Format directory is " + selection.getAbsolutePath());
+        myTextarea.clear()
+        printText("Format directory is " + selection.getAbsolutePath());
         formatDir =  selection.getAbsolutePath()
         formatDirSet = true;
         formatDirSetTemp = false;
       } else if(outDirSetTemp) {
-        myTextarea.setText("Output directory is " + selection.getAbsolutePath());
+         myTextarea.clear()
+        printText("Output directory is " + selection.getAbsolutePath());
         outDir =  selection.getAbsolutePath()
         outDirSet = true;
         outDirSetTemp = false;
@@ -200,9 +198,10 @@ class ProdCreatorViewer extends PApplet{
   
   def fileSelected(selection: File){
     if (selection == null) {
-      println("Window was closed or the user hit cancel.")
+      printText("Window was closed or the user hit cancel.")
       } else {
-         myTextarea.setText("Data file is " + selection.getAbsolutePath());
+        myTextarea.clear()
+        printText("Data file is " + selection.getAbsolutePath());
         dataDir =  selection.getAbsolutePath()
         dataDirSet = true;
         dataDirSetTemp = false;
@@ -223,20 +222,21 @@ class ProdCreatorViewer extends PApplet{
   
   def input(theText: String){
     if(controller == null){
-      myTextarea.setText("Error: Please set all directories / formats and hit GO first");
+     printText("Error: Please set all directories / formats and hit GO first");
     } else {
     /* if any items can't be found in data then return false and throw error message*/
     theText.split(",").foreach { 
       album =>
       controller.getAlbum(album) match{
-        case None =>   myTextarea.setText("Error: " + album + " does not exist in data")
+        case None =>  printText("Error: " + album + " does not exist in data")
                        inputValid = false
                        return
         case Some(x) => //do nothing
       }  
     } 
     inputValid = true
-    myTextarea.setText("input valid")
+     myTextarea.clear()
+    printText("input valid")
     albums = theText.split(",")  
     
     }
@@ -250,39 +250,59 @@ class ProdCreatorViewer extends PApplet{
   //TO DO - Refactor / rationalise
   def go{
     
-    if(controller == null) initialiseProductCreator
+    if(controller == null) {
+      initialiseProductCreator
+      return
+    }
     
+    if(! formatSelect){
+       myTextarea.clear()
+      printText("Error: Please select at least one format")
+       return
+    }
     
-     if(controller != null & formatSelect){
-       if(!inputValid){
-         myTextarea.setText("Error: Please input valid data");
+     
+     if(!inputValid){
+        myTextarea.clear() 
+       printText("Error: Please input valid data");
          return
        } else {
-       /*Process from here */
-          myTextarea.setText("PROCESSING");  
+          printText("PROCESSING")
+          //Thread sleep 1000
           albums.foreach { album =>  
-            if(xml)  printText("Creating " + album + "in xml") ; controller.createProduct(album, "xml")
-            if(mp4)  printText("Creating " + album + "in mp4") ;controller.createProduct(album, "mp4HD")
-            if(mp3g) printText("Creating " + album + "in mp3g") ;controller.createProduct(album, "mp3g320")
-            if(bin)  printText("Creating " + album + "in bin") ;controller.createProduct(album, "bin")
-            
-            
-            
+            if(xml)  {
+              draw()
+              printText("Creating " + album + " in xml");
+             //Thread sleep 5000
+             controller.createProduct(album, "xml") 
+            }
+            if(mp4)  {
+              draw()
+              printText("Creating " + album + " in mp4")
+              controller.createProduct(album, "mp4HD")
+            }
+            if(mp3g) {
+              draw()
+              printText("Creating " + album + " in mp3g")
+              controller.createProduct(album, "mp3g320")
+            }
+            if(bin) {
+              draw()
+              printText("Creating " + album + " in bin format")
+              controller.createProduct(album, "bin")
+            }
+            draw() 
+            printText("finished album: " + album)
           }
           printText("finished")
-//          albums.foreach { 
-//            println("hi")
-//            // TO do change to enum / case class
-//            //if(mp4) println("")
-//          }
-       }
-       
-       
-     } else {
-       myTextarea.setText("Error: Please set all directories before running and at least one format.");
-     }
-    
-    //helper function
+          albums = null
+          inputValid = false
+          textfield.clear()
+          printText("Ready to process more albums")
+          
+     }  
+      
+    //helper functions
     def formatSelect: Boolean = return xml || mp4 || mp3g || bin
     def productCreatorInitialised: Boolean = return return assetDirSet & formatDirSet & outDirSet & dataDirSet
   }
@@ -292,14 +312,20 @@ class ProdCreatorViewer extends PApplet{
   def initialiseProductCreator = {
     if(this.controller == null && prodCreateReadyForInit){
       controller = new ProductCreator(assetDir, formatDir, outDir, dataDir, this)
+       myTextarea.clear()
+      printText("Product creator initialised.  Please enter albums, press enter for validation and hit go again")
     } else {
-     myTextarea.setText("Error: Please set all directories before running and at least one format."); 
+     printText("Error: Please set all directories before running and at least one format."); 
     } 
     def prodCreateReadyForInit: Boolean = return return assetDirSet & formatDirSet & outDirSet & dataDirSet
   } 
   
   
-  def printText(text:String) = myTextarea.setText(myTextarea.getText + "\n " + text); 
+  def printText(text:String) = {
+    this.redraw
+    myTextarea.setText(myTextarea.getText + "\n " + text);
+  
+  }
       
   
 }

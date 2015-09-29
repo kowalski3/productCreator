@@ -11,27 +11,31 @@ import controlP5._
 /**
  * @author julian
  */
+// TO DO -  Improve this so not null start.  Have to initialise by setup() but also can't be left
+// unitialised else class
+// UI logic is very complex and bug prone, especially in relation to data validation.  Refactor
 class ProdCreatorViewer extends PApplet{
-  //Improve this so not null start.  Have to initialise by setup() but also can't be left
-  // unitialised else class
+ 
   
   var controller: ProductCreator = null
   
   var cp5: ControlP5 = null
-  
+  var myTextarea: Textarea = null
  
   var assetDir, formatDir, outDir, dataDir: String = ""
-  var assetDirSet, formatDirSet, outDirSet, dataDirSet: Boolean = false
+  var assetDirSet, formatDirSet, outDirSet, dataDirSet, inputValid: Boolean = false
   var assetDirSetTemp,formatDirSetTemp, outDirSetTemp, dataDirSetTemp: Boolean = false
   
-  
-  var xml, mp4, mp3g, bin = false //correspond to 0,1,2,3 in 'controlEvent'
-  var running = false;
-  
-  var textfield: Textfield = null
- 
-  var myTextarea: Textarea = null
+  //checkbox
   var checkbox: CheckBox = null
+  var xml, mp4, mp3g, bin = false //correspond to 0,1,2,3 in 'controlEvent'
+  //var running = false;
+  
+  //Text input
+  var albums:Array[String] = null;
+  var textfield: Textfield = null
+  
+  
   
   override def setup(){
     
@@ -69,13 +73,6 @@ class ProdCreatorViewer extends PApplet{
     .setSize(50,20)
     .setBroadcast(true);
     
-//    cp5.addButton("run")
-//    .setBroadcast(false)  
-//    .setValue(100)
-//    .setPosition(180,40)
-//    .setSize(50,20)
-//    .setBroadcast(true);
-     
     textfield = cp5.addTextfield("input")
                  .setPosition(40,120)
                  .setSize(200,40)
@@ -159,9 +156,9 @@ class ProdCreatorViewer extends PApplet{
    def data {
     if( ! dataDirSet) {
         dataDirSetTemp = true
-        selectFolder("Select a data directory", "selected")
+        selectInput("Select a data file", "fileSelected");
       } else{
-        myTextarea.setText("data directory is already set");
+        myTextarea.setText("Data file is already set");
       }
   }
   
@@ -189,14 +186,9 @@ class ProdCreatorViewer extends PApplet{
         outDir =  selection.getAbsolutePath()
         outDirSet = true;
         outDirSetTemp = false;
-      } else if(dataDirSetTemp) {
-        myTextarea.setText("Data directory is " + selection.getAbsolutePath());
-        dataDir =  selection.getAbsolutePath()
-        dataDirSet = true;
-        dataDirSetTemp = false;
       } 
-      
    } 
+  
   def controlEvent(theEvent: ControlEvent) {
     if (theEvent.isFrom(checkbox)) {
       if(checkbox.getArrayValue(0) == 1.0) xml =  true else xml =  false
@@ -206,32 +198,108 @@ class ProdCreatorViewer extends PApplet{
     }
   }
   
-
+  def fileSelected(selection: File){
+    if (selection == null) {
+      println("Window was closed or the user hit cancel.")
+      } else {
+         myTextarea.setText("Data file is " + selection.getAbsolutePath());
+        dataDir =  selection.getAbsolutePath()
+        dataDirSet = true;
+        dataDirSetTemp = false;
+      }
+    
+  }
  
+  
+  
+  
 /*----------------------------------------------------------
     GET ALBUMS
  ----------------------------------------------------------*/
 //START HERE
+/*
+   * Automatically receives results from controller input
+   */
+  
+  def input(theText: String){
+    if(controller == null){
+      myTextarea.setText("Error: Please set all directories / formats and hit GO first");
+    } else {
+    /* if any items can't be found in data then return false and throw error message*/
+    theText.split(",").foreach { 
+      album =>
+      controller.getAlbum(album) match{
+        case None =>   myTextarea.setText("Error: " + album + " does not exist in data")
+                       inputValid = false
+                       return
+        case Some(x) => //do nothing
+      }  
+    } 
+    inputValid = true
+    myTextarea.setText("input valid")
+    albums = theText.split(",")  
+    
+    }
+  }
 
   
   
   /*----------------------------------------------------------
     GO - get files
    ----------------------------------------------------------*/
+  //TO DO - Refactor / rationalise
   def go{
-    println(formatSelect)
-     if(assetDirSet & formatDirSet & outDirSet & dataDirSet & formatSelect){
-       myTextarea.setText("PROCESSING");
+    
+    if(controller == null) initialiseProductCreator
+    
+    
+     if(controller != null & formatSelect){
+       if(!inputValid){
+         myTextarea.setText("Error: Please input valid data");
+         return
+       } else {
+       /*Process from here */
+          myTextarea.setText("PROCESSING");  
+          albums.foreach { album =>  
+            if(xml)  printText("Creating " + album + "in xml") ; controller.createProduct(album, "xml")
+            if(mp4)  printText("Creating " + album + "in mp4") ;controller.createProduct(album, "mp4HD")
+            if(mp3g) printText("Creating " + album + "in mp3g") ;controller.createProduct(album, "mp3g320")
+            if(bin)  printText("Creating " + album + "in bin") ;controller.createProduct(album, "bin")
+            
+            
+            
+          }
+          printText("finished")
+//          albums.foreach { 
+//            println("hi")
+//            // TO do change to enum / case class
+//            //if(mp4) println("")
+//          }
+       }
+       
+       
      } else {
        myTextarea.setText("Error: Please set all directories before running and at least one format.");
      }
     
     //helper function
-    def formatSelect: Boolean = return xml || mp4 || mp3g || bin  
+    def formatSelect: Boolean = return xml || mp4 || mp3g || bin
+    def productCreatorInitialised: Boolean = return return assetDirSet & formatDirSet & outDirSet & dataDirSet
   }
 
   
   
+  def initialiseProductCreator = {
+    if(this.controller == null && prodCreateReadyForInit){
+      controller = new ProductCreator(assetDir, formatDir, outDir, dataDir, this)
+    } else {
+     myTextarea.setText("Error: Please set all directories before running and at least one format."); 
+    } 
+    def prodCreateReadyForInit: Boolean = return return assetDirSet & formatDirSet & outDirSet & dataDirSet
+  } 
+  
+  
+  def printText(text:String) = myTextarea.setText(myTextarea.getText + "\n " + text); 
       
   
 }

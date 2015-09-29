@@ -1,5 +1,6 @@
 package main.controller
 
+
 /**
  * @author julian
  */
@@ -10,6 +11,7 @@ import scala.collection.mutable.ListBuffer
 import java.io._
 import java.nio.file._
 import main.model._
+import main.view._
 import myUtils._ /*from scalaTools project */
 
 
@@ -23,10 +25,10 @@ import myUtils._ /*from scalaTools project */
 
 
 
-class ProductCreator(
-                      val assetSourceDirName: String, 
+class ProductCreator( val assetSourceDirName: String, 
                       val formatSourceDirName: String,
-                      val destDirName: String) {
+                      val destDirName: String,
+                      val view:ProdCreatorViewer) {
     
     val albumMap = Map[String,Album]()
   
@@ -37,9 +39,10 @@ class ProductCreator(
   def this(assetSourceDirName: String, 
            formatSourceDirName: String, 
            destDirName: String, 
-           dataFileName: String) = {
+           dataFileName: String,
+           view:ProdCreatorViewer) = {
     //TO DO, check for special characters, they're causing crash at the moment e.g Catch these errors / handle.
-    this(assetSourceDirName, formatSourceDirName, destDirName)
+    this(assetSourceDirName, formatSourceDirName, destDirName, view)
     val dataFile = scala.io.Source.fromFile(dataFileName)
     
     //TO DO - catch Exception in thread "main" java.lang.ArrayIndexOutOfBoundsException: 0
@@ -74,6 +77,10 @@ class ProductCreator(
     
   }
   
+  def getAlbum(albumName:String):Option[Album] = return albumMap.get(albumName) 
+    
+  
+  
   /**
    * Create Product
    */
@@ -89,12 +96,14 @@ class ProductCreator(
       
       val result = albumMap.get(albumid)
       result match{
-         case None => println("Product code " + albumid + " doesn't exist.")
-         case Some(album) => 
+         case None => //println("Product code " + albumid + " doesn't exist.")
+                      view.printText("Product code " + albumid + " doesn't exist.")
+         case Some(album) =>
+           //view.printText("Creating: " + albumid + " in " + "format.")
            for ((songid,trackName) <- result.get.trackList)
                try{
-                 println(songid)
-//                 copyFiles(albumFolderPath, songid, suffixes, trackName, format) 
+                 view.printText(songid)
+                 copyFiles(albumFolderPath, songid, suffixes, trackName, format) 
                } catch{
                  case e: RuntimeException => println(e)
                }     
@@ -149,41 +158,3 @@ class ProductCreator(
 }
 
  
-//
-//
-///**
-// * Runner object
-// * 
-// */
-//object ProductCreatorRun extends App {
-//      //TO DO change sourceDirName based on format
-//      
-//        //TO DO NEED REFATORING
-//
-//  
-//  
-//      val assetSourceDirName = "W:/SUNFLYGroundZERO/1 Assets"
-//      val formatSourceDirName = "W:/SUNFLYGroundZERO/2 Video Formats"
-//      val oldSource = "Z:/Sunfly Old Formats"  
-//  
-//      val destDirName = "C:/Julian/output/productCreator"
-//      
-//      
-//      val dataFileName = "C:/Julian/git/scalaTools/data/ProductCreatorData.csv"
-//      val pcreator = new ProductCreator(assetSourceDirName, formatSourceDirName, oldSource, destDirName, dataFileName)
-//
-//      
-//     // val albumIds = for(i <- 331 to 336) yield {"SF" + i }
-//      
-//      val albumIds = Array("MW855")
-//      //val formats = Array("bin")
-//      //val formats = Array("xml","bin","mp4HD","mp3g320","m4v","mov","mp3g128")
-// 
-//      val formats = Array("bin")
-//      albumIds.foreach { 
-//        albumId => formats.foreach { 
-//          format => pcreator.createProduct(albumId, format) 
-//          }
-//        }
-//    
-//}

@@ -34,10 +34,14 @@ class ProdCreatorViewer extends PApplet{
   //Text input
   var albums:Array[String] = null;
   var textfield: Textfield = null
-
+  
+  override def settings() {
+  size(300,510) 
+  }
+  
   override def setup(){
     
-    size(300,510) 
+    
     cp5 = new ControlP5(this);
     var font: PFont = createFont("arial",20);
     textFont(font);
@@ -112,6 +116,7 @@ class ProdCreatorViewer extends PApplet{
   }
   
   override def draw(){
+    
     background(0);
      fill(255);
   }

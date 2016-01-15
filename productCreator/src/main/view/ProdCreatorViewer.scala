@@ -1,7 +1,5 @@
 package main.view
 
-
-
 import main.controller.ProductCreator
 import processing.core._
 import java.io.File
@@ -15,8 +13,6 @@ import controlP5._
 // unitialised else class
 // UI logic is very complex and bug prone, especially in relation to data validation.  Refactor
 class ProdCreatorViewer extends PApplet{
- 
-  
   var controller: ProductCreator = null
   
   var cp5: ControlP5 = null
@@ -241,7 +237,7 @@ class ProdCreatorViewer extends PApplet{
     } 
     inputValid = true
      myTextarea.clear()
-    printText("input valid")
+    printText("Input valid")
     albums = theText.split(",")  
     
     }
@@ -272,34 +268,17 @@ class ProdCreatorViewer extends PApplet{
        printText("Error: Please input valid data");
          return
        } else {
-          printText("PROCESSING")
-          //Thread sleep 1000
           albums.foreach { album =>  
-            if(xml)  {
-              draw()
-              printText("Creating " + album + " in xml");
-             //Thread sleep 5000
-             controller.createProduct(album, "xml") 
-            }
-            if(mp4)  {
-              draw()
-              printText("Creating " + album + " in mp4")
-              controller.createProduct(album, "mp4HD")
-            }
-            if(mp3g) {
-              draw()
-              printText("Creating " + album + " in mp3g")
-              controller.createProduct(album, "mp3g320")
-            }
-            if(bin) {
-              draw()
-              printText("Creating " + album + " in bin format")
-              controller.createProduct(album, "bin")
-            }
-            draw() 
-            printText("finished album: " + album)
+            if(xml)controller.createProduct(album, "xml") 
+            
+            if(mp4) controller.createProduct(album, "mp4HD")
+            
+            if(mp3g) controller.createProduct(album, "mp3g320")
+            
+            if(bin) controller.createProduct(album, "bin")
+            
+            printText("finished album: " + album + "\n") 
           }
-          printText("finished")
           albums = null
           inputValid = false
           textfield.clear()
@@ -327,9 +306,7 @@ class ProdCreatorViewer extends PApplet{
   
   
   def printText(text:String) = {
-    this.redraw
-    myTextarea.setText(myTextarea.getText + "\n " + text);
-  
+    myTextarea.setText(myTextarea.getText + "\n" + text);
   }
       
   

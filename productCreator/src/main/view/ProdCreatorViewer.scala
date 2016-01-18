@@ -31,6 +31,26 @@ class ProdCreatorViewer extends PApplet{
   var albums:Array[String] = null;
   var textfield: Textfield = null
   
+  //Setup config
+  val fileName = "C://Julian//config.txt"
+  var configFile  = new java.io.File("./config.txt")
+//  //loadTextFile
+//  
+//  def loadTextFile: Boolean= {
+//    //looks for config.txt in output directory
+//    if (! configFile.exists()) {
+//      configFile.createNewFile(); return false
+//    }
+//    
+//    val fileContents = scala.io.Source.fromFile(fileName).getLines.mkString
+//    if(fileContents.length() == 0) return false
+//    
+//    val dirs = fileContents.split(",")
+//    
+//    true
+//   }
+  
+  
   override def settings() {
   size(300,510) 
   }
@@ -267,7 +287,10 @@ class ProdCreatorViewer extends PApplet{
         myTextarea.clear() 
        printText("Error: Please input valid data");
          return
-       } else {
+       } else { //Success.  Product creation starts here
+         //update text file
+         //file.log.write(e.toString()
+         
           albums.foreach { album =>  
             if(xml)controller.createProduct(album, "xml") 
             

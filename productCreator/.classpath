@@ -6,5 +6,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/ScalaUtils"/>
 	<classpathentry kind="lib" path="C:/Julian/lib/controlP5.jar"/>
 	<classpathentry kind="lib" path="C:/Julian/lib/core.jar"/>
+	<classpathentry kind="lib" path="C:/Program Files (x86)/scala/lib/scala-library.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

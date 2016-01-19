@@ -3,6 +3,7 @@ package main.view
 import main.controller.ProductCreator
 import processing.core._
 import java.io.File
+import java.io.PrintWriter
 import controlP5._
 
  
@@ -32,23 +33,26 @@ class ProdCreatorViewer extends PApplet{
   var textfield: Textfield = null
   
   //Setup config
-  val fileName = "C://Julian//config.txt"
-  var configFile  = new java.io.File("./config.txt")
-//  //loadTextFile
-//  
-//  def loadTextFile: Boolean= {
-//    //looks for config.txt in output directory
-//    if (! configFile.exists()) {
-//      configFile.createNewFile(); return false
-//    }
-//    
-//    val fileContents = scala.io.Source.fromFile(fileName).getLines.mkString
-//    if(fileContents.length() == 0) return false
-//    
-//    val dirs = fileContents.split(",")
-//    
-//    true
-//   }
+  val fileName = "./setup.txt"
+  
+  
+  
+  
+  //////////////////////////////////////////////////////
+  def loadTextFile {
+    //looks for config.txt in output directory
+    if (new File(fileName).exists()){
+      //order of directories is asset,format, outDir, dataDir
+      val dirs = scala.io.Source.fromFile(fileName).getLines.mkString.split(",")
+      println(dirs.length)
+      assetDirSetTemp = true
+      selected(new File(dirs(0)))
+      formatDirSetTemp= true
+      selected(new File(dirs(1)))
+      outDirSetTemp = true
+      selected(new File(dirs(2)))
+  }
+   }
   
   
   override def settings() {
@@ -128,7 +132,7 @@ class ProdCreatorViewer extends PApplet{
       .setColorBackground(color(255,100))
       .setColorForeground(color(255,100));
     
-
+      loadTextFile
   }
   
   override def draw(){
@@ -176,6 +180,7 @@ class ProdCreatorViewer extends PApplet{
       } else{
         printText("Data file is already set");
       }
+  
   }
   
    
@@ -287,9 +292,13 @@ class ProdCreatorViewer extends PApplet{
         myTextarea.clear() 
        printText("Error: Please input valid data");
          return
-       } else { //Success.  Product creation starts here
+       } else { 
+         //Success.  Product creation starts here
          //update text file
-         //file.log.write(e.toString()
+         println("ready")
+         val fileSave = new PrintWriter(fileName)
+         fileSave.write(assetDir+","+formatDir+","+outDir+","+dataDir)
+         fileSave.close()
          
           albums.foreach { album =>  
             if(xml)controller.createProduct(album, "xml") 
